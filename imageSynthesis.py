@@ -1,12 +1,27 @@
-# aliyun_image_generator.py
 import os
+import sys
+from pathlib import Path
 from http import HTTPStatus
 from urllib.parse import urlparse, unquote
 from pathlib import PurePosixPath
 import requests
 from dashscope import ImageSynthesis
-
 from dotenv import load_dotenv
+
+# 确定基础目录
+if getattr(sys, 'frozen', False):
+    BASE_DIR = Path(sys.executable).parent
+else:
+    BASE_DIR = Path(__file__).parent
+
+# 加载.env文件
+env_path = BASE_DIR / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+    print(f"已从 {env_path} 加载环境变量")
+else:
+    print(f"未找到 .env 文件在 {env_path}，将使用系统环境变量")
+    load_dotenv()
 
 
 class AliyunImageGenerator:
@@ -17,15 +32,12 @@ class AliyunImageGenerator:
         参数:
         api_key (str): 阿里云API密钥。如果为None，则从环境变量中读取
         """
-        # load_dotenv()  # 加载.env文件中的环境变量
-
-        # self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
-        self.api_key = api_key
+        self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
         if not self.api_key:
             raise ValueError("未提供API密钥且环境变量DASHSCOPE_API_KEY未设置")
 
     def generate_image(self, prompt, model="wanx2.1-t2i-turbo", size="1024*1024",
-                       n=1, save_dir=".", file_prefix="generated", verbose=False):
+                       n=1, save_dir="generated_images", file_prefix="generated", verbose=False):
         """
         生成图像并保存到本地
 
@@ -34,19 +46,24 @@ class AliyunImageGenerator:
         model (str): 使用的模型，默认为"wanx2.1-t2i-turbo"
         size (str): 图像尺寸，格式为"宽*高"，默认为"1024*1024"
         n (int): 生成图像数量，默认为1
-        save_dir (str): 保存图像的目录，默认为当前目录
+        save_dir (str): 保存图像的目录，默认为"generated_images"
         file_prefix (str): 文件名前缀，默认为"generated"
         verbose (bool): 是否打印详细输出，默认为False
 
         返回:
         list: 保存的文件路径列表
         """
+        # 确保保存目录是相对于BASE_DIR的绝对路径
+        if not os.path.isabs(save_dir):
+            save_dir = BASE_DIR / save_dir
+
         # 确保保存目录存在
         os.makedirs(save_dir, exist_ok=True)
 
         if verbose:
-            print(f"----正在生成图像: '{prompt}'----")
-            print(f"----使用模型：'{model}'")
+            print(f"正在生成图像: '{prompt}'")
+            print(f"使用模型: '{model}'")
+
         # 调用阿里云API
         rsp = ImageSynthesis.call(
             api_key=self.api_key,
@@ -84,9 +101,9 @@ class AliyunImageGenerator:
         return saved_files
 
 
-# 示例使用
 if __name__ == "__main__":
-    # 创建生成器实例
+    # 创建生成器实例，不再硬编码API密钥
+    # 现在会从.env文件或系统环境变量中读取DASHSCOPE_API_KEY
     generator = AliyunImageGenerator()
 
     # 生成图像
@@ -94,7 +111,7 @@ if __name__ == "__main__":
     saved_files = generator.generate_image(
         prompt,
         model="wanx2.1-t2i-turbo",
-        save_dir="../generated_images",
+        save_dir="./generated_images",
         file_prefix="flower_shop",
         verbose=True
     )

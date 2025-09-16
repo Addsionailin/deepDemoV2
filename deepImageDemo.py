@@ -368,18 +368,18 @@ def create_gui():
                     chat_history.update()
 
                     # 检查是否有最近生成的图像
-                    # if app_state.last_generated_image is None or not os.path.exists(app_state.last_generated_image):
-                    #     chat_history.insert(tk.END, "助手: 未找到可扩展的图像，请先生成一张图像。\n\n")
-                    #     chat_history.yview(tk.END)
-                    #     return
+                    if app_state.last_generated_image is None or not os.path.exists(app_state.last_generated_image):
+                        chat_history.insert(tk.END, "助手: 未找到可扩展的图像，请先生成一张图像。\n\n")
+                        chat_history.yview(tk.END)
+                        return
 
                     # 使用线程执行扩图操作
-                    # threading.Thread(target=lambda: extend_image(
-                    #     query, app_state.last_generated_image, chat_history
-                    # )).start()
                     threading.Thread(target=lambda: extend_image(
-                        query, "E:/PyCharm/py/deepDemoV2/tmp/cat.png", chat_history
+                        query, app_state.last_generated_image, chat_history
                     )).start()
+                    # threading.Thread(target=lambda: extend_image(
+                    #     query, "E:/PyCharm/py/deepDemoV2/tmp/cat.png", chat_history
+                    # )).start()
 
                 elif intentEnum == IntentType.OTHER:
                     chat_history.insert(tk.END, "助手: \n\n")

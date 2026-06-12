@@ -1,0 +1,7 @@
+openai
+langchain-openai
+pillow
+dashscope
+python-dotenv
+requests
+oss2

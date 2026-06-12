@@ -1,0 +1,13 @@
+# 多模型组合流水线配置示例
+# 详见 PROJECT_SPEC.md §5.3
+
+pipelines:
+  generate_then_outpaint:
+    description: 文生图后自动扩图
+    steps:
+      - capability: text2image
+        input: prompt
+      - capability: outpainting
+        input: last_artifact
+        params:
+          direction: all

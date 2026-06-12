@@ -1,0 +1,41 @@
+# 复制为 models.yaml 后填写，或通过环境变量注入密钥
+# 详见 PROJECT_SPEC.md §5
+
+secrets:
+  deepseek_api_key: ${DEEPSEEK_API_KEY}
+  dashscope_api_key: ${DASHSCOPE_API_KEY}
+
+defaults:
+  router:
+    provider: deepseek
+    model: deepseek-chat
+  chat:
+    provider: deepseek
+    model: deepseek-chat
+    params:
+      max_tokens: 1024
+      temperature: 0.7
+      system_prompt: "你是一个助手"
+  intent:
+    provider: deepseek
+    model: deepseek-chat
+  text2image:
+    provider: dashscope
+    model: wanx2.1-t2i-turbo
+    params:
+      size: "1024*1024"
+  outpainting:
+    provider: dashscope
+    model: wanx2.1-imageedit
+    params:
+      top_scale: 1.2
+      bottom_scale: 1.2
+      left_scale: 1.2
+      right_scale: 1.2
+
+fallbacks:
+  chat: [deepseek]
+
+storage:
+  output_dir: generated_images
+  log_file: logs/conversation.log
